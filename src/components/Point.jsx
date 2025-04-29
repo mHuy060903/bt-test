@@ -13,7 +13,7 @@ const Point = ({ value, position, check, onCheck, top, left, z_index }) => {
     onCheck(value, position);
   };
 
-  const backgroundClass = check ? "bg-red-400" : "bg-white";
+  const backgroundClass = check ? "bg-red-800" : "bg-white";
 
   return (
     <div
@@ -22,6 +22,7 @@ const Point = ({ value, position, check, onCheck, top, left, z_index }) => {
         top: `${top}px`,
         left: `${left}px`,
         zIndex: check ? 1000 : z_index,
+        backgroundColor: check ? "red" : "white",
       }}
       className={`absolute
         ${value === 0 ? "invisible" : "inline-block"}

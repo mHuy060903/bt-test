@@ -234,8 +234,12 @@ const App = () => {
         ))}
       </div> */}
       <div
+        style={{
+          width: `${WITH_BOARD}px`,
+          height: `${HEIGHT_BOARD}px`,
+        }}
         ref={boardRef}
-        className={`relative h-[600px] w-[600px] h-[${HEIGHT_BOARD}px] w-[${WITH_BOARD}px]  gap-2 border-1 border-black p-4`}
+        className={`relative  gap-2 border-1 border-black p-4`}
       >
         {list.map((point, index) => (
           <Point key={`${gameId}-${index}`} {...point} onCheck={onCheck} />
