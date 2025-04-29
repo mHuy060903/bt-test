@@ -1,16 +1,19 @@
 import React, { useRef, useState, useEffect } from "react";
-import Point from "./components/Point";
+import Point from "./components/point";
 
 const App = () => {
   const [list, setList] = useState(
     Array.from({ length: 100 }).fill({ value: 0, position: 0, check: false })
   );
+  const [gameId, setGameId] = useState(0);
+  const [isAutoPlay, setIsAutoPlay] = useState(false);
   const [textHeading, setTextHeading] = useState("LET'S PLAY");
   const [nextPoint, setNextPoint] = useState(0);
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const refInput = useRef();
   const startTimeRef = useRef(0);
+  const boardRef = useRef();
 
   useEffect(() => {
     let interval;
@@ -24,12 +27,35 @@ const App = () => {
     return () => clearInterval(interval);
   }, [isRunning]);
 
+  useEffect(() => {
+    let interval;
+    if (isAutoPlay) {
+      interval = setInterval(() => {
+        const newList = list.slice();
+        const findvalueIndex = newList.findIndex(
+          (point) => point.value === nextPoint
+        );
+        if (findvalueIndex !== -1) {
+          onCheck(nextPoint, findvalueIndex);
+        }
+      }, 2000);
+    }
+    return () => clearInterval(interval);
+  }, [isAutoPlay, list, nextPoint]);
+
   const handleSubmit = () => {
-    let numPoint = Number.parseInt(refInput.current.value);
+    if (!Number.parseInt(refInput.current.value)) return;
+
+    setGameId((prev) => prev + 1);
+
     setTextHeading("LET'S PLAY");
-    setNextPoint(numPoint);
+    setNextPoint(1);
     setTime(0);
+
+    startTimeRef.current = Date.now();
     setIsRunning(true);
+
+    let numPoint = Number.parseInt(refInput.current.value);
     let num = numPoint;
     const arrPosition = new Set();
     while (numPoint > 0) {
@@ -69,16 +95,31 @@ const App = () => {
           return point;
         })
       );
-      setNextPoint((prev) => prev - 1);
-      if (value === 1) {
-        setTextHeading("ALL CLEARED");
-        setIsRunning(false);
+      setNextPoint((prev) => prev + 1);
+      if (value === Number.parseInt(refInput.current.value)) {
+        setTimeout(() => {
+          setIsRunning(false);
+          setTextHeading("ALL CLEARED");
+          setIsAutoPlay(false);
+        }, 2000);
       }
     } else {
       setTextHeading("GAME OVER");
       setIsRunning(false);
+      setIsAutoPlay(false);
     }
   };
+  useEffect(() => {
+    let interval;
+    if (isRunning) {
+      startTimeRef.current = Date.now();
+      interval = setInterval(() => {
+        const elapsed = (Date.now() - startTimeRef.current) / 1000;
+        setTime(elapsed.toFixed(1));
+      }, 100);
+    }
+    return () => clearInterval(interval);
+  }, [isRunning]);
 
   return (
     <div className="text-full w-full flex flex-col items-start gap-y-3">
@@ -100,17 +141,46 @@ const App = () => {
         <p>Time:</p>
         <p>{time}s</p>
       </div>
-      <button
-        onClick={handleSubmit}
-        className="border-1 border-black px-4 py-2 rounded-lg cursor-pointer bg-neutral-300 hover:bg-neutral-400 transition-colors"
+      <div className="flex gap-x-3">
+        <button
+          onClick={handleSubmit}
+          className="border-1 border-black px-4 py-2 rounded-lg cursor-pointer bg-neutral-300 hover:bg-neutral-400 transition-colors"
+        >
+          {time <= 0 ? "Start" : "Restart"}
+        </button>
+        {isRunning && (
+          <button
+            onClick={() => {
+              if (isAutoPlay === false) {
+                const newList = list.slice();
+                const findvalueIndex = newList.findIndex(
+                  (point) => point.value === nextPoint
+                );
+                onCheck(nextPoint, findvalueIndex);
+              }
+              setIsAutoPlay((prev) => !prev);
+            }}
+            className="border-1 border-black px-4 py-2 rounded-lg cursor-pointer bg-neutral-300 hover:bg-neutral-400 transition-colors"
+          >
+            Auto Play {!isAutoPlay ? "ON" : "OFF"}
+          </button>
+        )}
+      </div>
+      <div
+        ref={boardRef}
+        className="grid grid-cols-10 gap-2 border-1 border-black p-4"
       >
-        Restart
-      </button>
-      <div className="grid grid-cols-10 gap-2 border-1 border-black p-4">
         {list.map((point, index) => (
-          <Point key={index} {...point} onCheck={onCheck} />
+          <Point key={`${gameId}-${index}`} {...point} onCheck={onCheck} />
         ))}
       </div>
+      <p>
+        {time > 0 &&
+          nextPoint <= Number.parseInt(refInput.current.value) &&
+          textHeading !== "GAME OVER" &&
+          textHeading !== "ALL CLEARED" &&
+          `Next: ${nextPoint}`}{" "}
+      </p>
     </div>
   );
 };
