@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import Point from "./components/point";
-
+import Point from "./components/Point";
 const App = () => {
   const [list, setList] = useState(
     Array.from({ length: 100 }).fill({ value: 0, position: 0, check: false })
