@@ -1,8 +1,18 @@
 import React, { useRef, useState, useEffect } from "react";
 import Point from "./components/Point";
+import { generateRandomPoints } from "./utils";
+import { HEIGHT_BOARD, WITH_BOARD } from "./constants";
+
 const App = () => {
   const [list, setList] = useState(
-    Array.from({ length: 100 }).fill({ value: 0, position: 0, check: false })
+    Array.from({ length: 0 }).fill({
+      value: 0,
+      position: 0,
+      check: false,
+      left: 0,
+      right: 0,
+      z_index: 0,
+    })
   );
   const [gameId, setGameId] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(false);
@@ -42,9 +52,50 @@ const App = () => {
     return () => clearInterval(interval);
   }, [isAutoPlay, list, nextPoint]);
 
-  const handleSubmit = () => {
-    if (!Number.parseInt(refInput.current.value)) return;
+  // const handleSubmit = () => {
+  //   if (!Number.parseInt(refInput.current.value)) return;
 
+  //   setGameId((prev) => prev + 1);
+
+  //   setTextHeading("LET'S PLAY");
+  //   setNextPoint(1);
+  //   setTime(0);
+
+  //   startTimeRef.current = Date.now();
+  //   setIsRunning(true);
+
+  //   let numPoint = Number.parseInt(refInput.current.value);
+  //   let num = numPoint;
+  //   const arrPosition = new Set();
+  //   while (numPoint > 0) {
+  //     const randomNumber = Math.floor(Math.random() * 100);
+  //     arrPosition.add(randomNumber);
+  //     numPoint--;
+  //   }
+
+  //   const newPoint = Array.from({ length: 100 }).map((_, index) => ({
+  //     value: 0,
+  //     position: index,
+  //     check: false,
+  //   }));
+
+  //   while (num > 0) {
+  //     const firstElement = arrPosition.values().next().value;
+  //     arrPosition.delete(firstElement);
+  //     newPoint[firstElement] = {
+  //       ...newPoint[firstElement],
+  //       value: num,
+  //       position: firstElement,
+  //     };
+  //     num--;
+  //   }
+
+  //   setList(newPoint);
+  // };
+  const handleSubmit = () => {
+    const numsPoint = Number.parseInt(refInput.current.value);
+    if (!numsPoint) return;
+    console.log(numsPoint);
     setGameId((prev) => prev + 1);
 
     setTextHeading("LET'S PLAY");
@@ -54,28 +105,37 @@ const App = () => {
     startTimeRef.current = Date.now();
     setIsRunning(true);
 
-    let numPoint = Number.parseInt(refInput.current.value);
+    let numPoint = numsPoint;
     let num = numPoint;
     const arrPosition = new Set();
     while (numPoint > 0) {
-      const randomNumber = Math.floor(Math.random() * 100);
-      arrPosition.add(randomNumber);
-      numPoint--;
+      const randomNumber = Math.floor(Math.random() * numsPoint);
+      if (!arrPosition.has(randomNumber)) {
+        arrPosition.add(randomNumber);
+        numPoint--;
+      }
     }
 
-    const newPoint = Array.from({ length: 100 }).map((_, index) => ({
+    const newPoint = Array.from({ length: numsPoint }).map((_, index) => ({
       value: 0,
       position: index,
       check: false,
+      top: 0,
+      left: 0,
+      z_index: 0,
     }));
 
     while (num > 0) {
       const firstElement = arrPosition.values().next().value;
+      const { left, top, z_index } = generateRandomPoints();
       arrPosition.delete(firstElement);
       newPoint[firstElement] = {
         ...newPoint[firstElement],
         value: num,
         position: firstElement,
+        left,
+        top,
+        z_index,
       };
       num--;
     }
@@ -165,9 +225,17 @@ const App = () => {
           </button>
         )}
       </div>
-      <div
+      {/* <div
         ref={boardRef}
         className="grid grid-cols-10 gap-2 border-1 border-black p-4"
+      >
+        {list.map((point, index) => (
+          <Point key={`${gameId}-${index}`} {...point} onCheck={onCheck} />
+        ))}
+      </div> */}
+      <div
+        ref={boardRef}
+        className={`relative h-[600px] w-[600px] h-[${HEIGHT_BOARD}px] w-[${WITH_BOARD}px]  gap-2 border-1 border-black p-4`}
       >
         {list.map((point, index) => (
           <Point key={`${gameId}-${index}`} {...point} onCheck={onCheck} />

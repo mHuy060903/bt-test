@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const Point = ({ value, position, check, onCheck, top, left }) => {
+const Point = ({ value, position, check, onCheck, top, left, z_index }) => {
   const [fadeOut, setFadeOut] = useState(false);
 
   useEffect(() => {
@@ -18,9 +18,14 @@ const Point = ({ value, position, check, onCheck, top, left }) => {
   return (
     <div
       onClick={onHandleCheck}
-      className={`
+      style={{
+        top: `${top}px`,
+        left: `${left}px`,
+        zIndex: check ? 1000 : z_index,
+      }}
+      className={`absolute
         ${value === 0 ? "invisible" : "inline-block"}
-        col-span-1 p-2 px-4 rounded-full border-1 border-black text-center
+         p-2 px-4 rounded-full border-1 border-black text-center
         ${backgroundClass}
         ${fadeOut ? "opacity-0" : "opacity-100"}
         transition-all duration-2000 ease-in-out
